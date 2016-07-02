@@ -2,8 +2,9 @@
 
 global $db;
 
-if(!defined('UBER') || !UBER) {
+if(!defined('HOTEL') || !HOTEL) {
 	exit;
 }
 
-$db->Query('UPDATE users SET daily_respect_points = "3"');
+$query = $db->prepare('UPDATE `users` SET `daily_respect_points`="3"');
+$query->execute();

@@ -2,9 +2,14 @@
 
 global $db;
 
-if(!defined('UBER') || !UBER) {
+if(!defined('HOTEL') || !HOTEL) {
 	exit;
 }
+
+$query = $db->prepare('SELECT `status` FROM `server_status` LIMIT 1');
+$query->execute();
+$curStat = $query->fetch(PDO::FETCH_ASSOC);
+$curStat = $curStat['status'];
 
 $curStat = (int) $db->Result($db->Query('SELECT status FROM server_status LIMIT 1'), 0);
 

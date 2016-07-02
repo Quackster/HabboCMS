@@ -4,7 +4,7 @@ if(file_exists('./install/index.php')) {
 	header('Location: ./install/');
 }
 
-define('HABBO', true);
+define('HOTEL', true);
 define('LB', chr(13));
 define('ROOT', dirname(__DIR__));
 define('USER_IP', $_SERVER['REMOTE_ADDR']);

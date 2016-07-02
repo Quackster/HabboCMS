@@ -6,33 +6,45 @@ class Cron
 	{
 		global $db;
 		
-		$query = $db->Query('SELECT id FROM site_cron WHERE enabled = "1" ORDER BY prio ASC');
-		while($job = $db->FetchAssoc($query))
-		{
-			if (self::getNextExec($job['id']) <= time())
+		$query = $db->prepare('SELECT `id` FROM `site_cron` WHERE `enabled`="1" ORDER BY `prio` ASC');
+		$query->execute();
+
+		$jobList = $query->fetchAll(PDO::FETCH_ASSOC);
+		foreach($jobList as $job) {
+			if(self::getNextExec($job['id']) <= time()) {
 				self::runJob($job['id']);
+			}
 		}
 	}
 	
 	public static function runJob($jobId)
 	{
 		global $db;
-		
-		$script = $db->Result($db->Query('SELECT scriptfile FROM site_cron WHERE id = "' . $jobId . '" LIMIT 1'), 0);
-		
-		if(!self::checkScript($script)) {
+
+        $query = $db->prepare('SELECT `scriptfile` FROM `site_cron` WHERE `id`=:jobId LIMIT 1');
+        $query->execute(array(
+            ':jobId' => $jobId,
+        ));
+
+        $script = $query->fetch(PDO::FETCH_ASSOC);
+
+		if(!self::checkScript($script['scriptfile'])) {
 			Core::systemError('Cron Error', 'Could not execute cron job "' . $script . '": could not locate script file.');
 			return;
 		}
-		
-		require_once INCLUDES . '/cron_scripts/' . $script;
-		
-		$db->Query('UPDATE site_cron SET last_exec = "' . time() . '" WHERE id = "' . $jobId . '" LIMIT 1');
+        
+		require_once ROOT . '/inc/cron_scripts/' . $script['scriptfile'];
+
+        $query = $db->prepare('UPDATE `site_cron` SET `last_exec`=:execTime WHERE `id`=:jobId LIMIT 1');
+        $query->execute(array(
+            ':execTime' => time(),
+            ':jobId' => $jobId,
+        ));
 	}
 	
 	public static function checkScript($script)
 	{
-		if(file_exists(INCLUDES . '/cron_scripts/' . $script)) {
+		if(file_exists(ROOT . '/inc/cron_scripts/' . $script)) {
 			return true;
 		}
 		return false;
@@ -41,14 +53,16 @@ class Cron
 	public static function getNextExec($jobId)
 	{
 		global $db;
-		
-		$query = $db->Query('SELECT last_exec, exec_every FROM site_cron WHERE id = "' . $jobId . '" LIMIT 1');
-		
-		if($db->NumRows($query) == 1)
-		{
-			$data = $db->FetchAssoc($query);
-			return $data['last_exec'] + $data['exec_every'];		
-		}
-		return -1;
+
+        $query = $db->prepare('SELECT `last_exec`,`exec_every` FROM `site_cron` WHERE `id`=:jobId LIMIT 1');
+        $query->execute(array(
+            ':jobId' => $jobId,
+        ));
+
+        if($query->rowCount() == 1) {
+            $data = $query->fetch(PDO::FETCH_ASSOC);
+            return $data['last_exec'] + $data['exec_every'];
+        }
+        return -1;
 	}
 }

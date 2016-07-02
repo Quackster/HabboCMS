@@ -142,7 +142,7 @@ class Core
 	
 	public static function parseConfig()
 	{
-		$configPath = INCLUDES . '/inc.config.php';
+		$configPath = ROOT . '/inc/inc.config.php';
 		
 		if(file_exists($configPath)) {
             $config = require $configPath;

@@ -2,9 +2,11 @@
 
 global $db;
 
-if(!defined('UBER') || !UBER) {
+if(!defined('HOTEL') || !HOTEL) {
 	exit;
 }
 
-$db->Query('UPDATE users SET credits = "3000" WHERE credits < 3000');
+$query = $db->prepare('UPDATE `users` SET `credits`="3000" WHERE `credits` < 3000');
+$query->execute();
+
 Core::mus('updateCredits', 'ALL');
