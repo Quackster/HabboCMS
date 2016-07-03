@@ -4,22 +4,13 @@ class I18n
 {
     public static $class;
 
-    private $translation;
+    private static $group = 'global';
+    private static $translation;
 
     /**
      * @param $language
      */
     public static function load($language)
-    {
-        self::$class = new I18n($language);
-    }
-
-    /**
-     * I18n constructor.
-     *
-     * @param $language
-     */
-    function __construct($language)
     {
         $file = ROOT . '/inc/lang/' . $language . '.json';
 
@@ -31,7 +22,12 @@ class I18n
             $translation = json_decode($translationContent);
         }
 
-        $this->translation = $translation;
+        self::$translation = $translation;
+    }
+
+    public static function setGroup($group = 'global')
+    {
+        self::$group = $group;
     }
 
     /**
@@ -39,10 +35,10 @@ class I18n
      *
      * @return int|mixed|string
      */
-    function get($key)
+    public static function get($key)
     {
-        if (isset($this->translation[$key])) {
-            $text = $this->translation[$key];
+        if (isset(self::$translation[self::$group][$key])) {
+            $text = self::$translation[self::$group][$key];
         } else {
             return $key;
         }

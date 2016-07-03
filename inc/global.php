@@ -28,7 +28,7 @@ require 'class.i18n.php';
 
 Core::parseConfig();
 
-$trans = new I18n(Core::$config['Site']['language']);
+I18n::load(Core::$config['Site']['language']);
 
 try {
     $db = new PDO('mysql:host=' . Core::$config['MySQL']['hostname'] . ';dbname=' . Core::$config['MySQL']['database'],
