@@ -1,7 +1,7 @@
 <?php
 
-if(file_exists('./install/index.php')) {
-	header('Location: ./install/');
+if (file_exists('./install/index.php')) {
+    header('Location: ./install/');
 }
 
 define('HOTEL', true);
@@ -16,18 +16,24 @@ session_start();
 ///////////////////////////////////////////////////////////////////
 
 require 'class.core.php';
+
+Core::startExecTime();
+
 require 'class.cron.php';
 require 'class.users.php';
 require 'class.tpl.php';
+require 'class.i18n.php';
 
 ///////////////////////////////////////////////////////////////////
 
 Core::parseConfig();
 
+$trans = new I18n(Core::$config['Site']['language']);
 
 try {
-    $db = new PDO('mysql:host=' . Core::$config['MySQL']['hostname'] . ';dbname=' . Core::$config['MySQL']['database'], Core::$config['MySQL']['username'], Core::$config['MySQL']['password']);
-} catch(\PDOException $error) {
+    $db = new PDO('mysql:host=' . Core::$config['MySQL']['hostname'] . ';dbname=' . Core::$config['MySQL']['database'],
+        Core::$config['MySQL']['username'], Core::$config['MySQL']['password']);
+} catch (PDOException $error) {
     Core::systemError('Database Error', $error->getMessage());
 }
 
@@ -35,68 +41,58 @@ Cron::execute();
 
 ///////////////////////////////////////////////////////////////////
 
-if(isset($_SESSION['USER_N']) && isset($_SESSION['USER_H'])) {
-	$userN = $_SESSION['USER_N'];
-	$userH = $_SESSION['SER_H'];
+if (isset($_SESSION['USER_N']) && isset($_SESSION['USER_H'])) {
+    $userN = $_SESSION['USER_N'];
+    $userH = $_SESSION['SER_H'];
 
-	if(Users::validateUser($userN, $userH)) {
-		define('LOGGED_IN', true);
-		define('USER_NAME', $userN);
-		define('USER_ID', Users::Name2id($userN));
-		define('USER_HASH', $userH);
+    if (Users::validateUser($userN, $userH)) {
+        define('LOGGED_IN', true);
+        define('USER_NAME', $userN);
+        define('USER_ID', Users::name2id($userN));
+        define('USER_HASH', $userH);
 
-		Users::cacheUser(USER_ID);
-	} else {
-		@session_destroy();
-		header('Location: ' . WWW . '/');
-		exit;
-	}
+        Users::cacheUser(USER_ID);
+    } else {
+        @session_destroy();
+        header('Location: ' . WWW . '/');
+        exit;
+    }
 } else {
-	define('LOGGED_IN', false);
-	define('USER_NAME', 'Guest');
-	define('USER_ID', -1);
-	define('USER_HASH', null);
+    define('LOGGED_IN', false);
+    define('USER_NAME', 'Guest');
+    define('USER_ID', -1);
+    define('USER_HASH', null);
 }
 
 define('FORCE_MAINTENANCE', ((Core::getMaintenanceStatus() == 1) ? true : false));
 
-if(FORCE_MAINTENANCE && !defined('IN_MAINTENANCE')) {
-	if(!LOGGED_IN || !Users::hasFuse(USER_ID, 'fuse_ignore_maintenance')) {
-		header('Location: ' . WWW . '/maintenance');
-		exit;
-	}
+if (FORCE_MAINTENANCE && !defined('IN_MAINTENANCE')) {
+    if (!LOGGED_IN || !Users::hasFuse(USER_ID, 'fuse_ignore_maintenance')) {
+        header('Location: ' . WWW . '/maintenance');
+        exit;
+    }
 }
 
-if((!defined('BAN_PAGE') || !BAN_PAGE) && (Users::isIpBanned(USER_IP) || (LOGGED_IN && Users::isUserBanned(USER_NAME)))) {
-	header('Location: ' . WWW . '/banned');
-	exit;
+if ((!defined('BAN_PAGE') || !BAN_PAGE) && (Users::isIpBanned(USER_IP) || (LOGGED_IN && Users::isUserBanned(USER_NAME)))) {
+    header('Location: ' . WWW . '/banned');
+    exit;
 }
 
 Core::checkCookies();
 
 ///////////////////////////////////////////////////////////////////
 
-function filter($strInput)
-{
-	return Core::filterInputString($strInput);
-}
-
-function clean($strInput, $ignoreHtml = false, $nl2br = false)
-{
-	return Core::cleanStringForOutput($strInput, $ignoreHtml, $nl2br);
-}
-
 function shuffle_assoc(&$array)
 {
-	$keys = array_keys($array);
+    $keys = array_keys($array);
 
-	shuffle($keys);
+    shuffle($keys);
 
-	$new = array();
-	foreach($keys as $key) {
-		$new[$key] = $array[$key];
-	}
-	$array = $new;
+    $new = array();
+    foreach ($keys as $key) {
+        $new[$key] = $array[$key];
+    }
+    $array = $new;
 
-	return true;
+    return true;
 }

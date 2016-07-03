@@ -2,8 +2,8 @@
 
 global $db;
 
-if(!defined('HOTEL') || !HOTEL) {
-	exit;
+if (!defined('HOTEL') || !HOTEL) {
+    exit;
 }
 
 $visitsCutoff = time() - 259200;
