@@ -330,9 +330,9 @@ class Users
             return self::$userCache[$id][$var];
         }
 
-        $query = $db->prepare('SELECT :var FROM `users` WHERE `id`=:userId LIMIT 1');
+        // TODO: Cache all informations
+        $query = $db->prepare('SELECT * FROM `users` WHERE `id`=:userId LIMIT 1');
         $query->execute(array(
-            ':var'    => $var,
             ':userId' => $id,
         ));
 
@@ -611,7 +611,7 @@ class Users
     ) {
         $look = self::getUserVar($id, 'look');
 
-        return 'http://www.habbo.co.uk/habbo-imaging/avatarimage?figure=' . $look . '&size=' . $size . '&action=' . $action . ',&gesture=' . $gesture . '&direction=' . $dir . '&head_direction=' . $head_dir;
+        return WWW . '/habbo-imaging/avatarimage?figure=' . $look . '&size=' . $size . '&action=' . $action . ',&gesture=' . $gesture . '&direction=' . $dir . '&head_direction=' . $head_dir;
     }
 
     /**

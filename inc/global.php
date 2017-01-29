@@ -43,7 +43,7 @@ Cron::execute();
 
 if (isset($_SESSION['USER_N']) && isset($_SESSION['USER_H'])) {
     $userN = $_SESSION['USER_N'];
-    $userH = $_SESSION['SER_H'];
+    $userH = $_SESSION['USER_H'];
 
     if (Users::validateUser($userN, $userH)) {
         define('LOGGED_IN', true);
@@ -66,10 +66,12 @@ if (isset($_SESSION['USER_N']) && isset($_SESSION['USER_H'])) {
 
 define('FORCE_MAINTENANCE', ((Core::getMaintenanceStatus() == 1) ? true : false));
 
-if (FORCE_MAINTENANCE && !defined('IN_MAINTENANCE')) {
-    if (!LOGGED_IN || !Users::hasFuse(USER_ID, 'fuse_ignore_maintenance')) {
-        header('Location: ' . WWW . '/maintenance');
-        exit;
+if (defined('MAINTENANCE_POSSIBLE') && MAINTENANCE_POSSIBLE) {
+    if (FORCE_MAINTENANCE && !defined('IN_MAINTENANCE')) {
+        if (!LOGGED_IN || !Users::hasFuse(USER_ID, 'fuse_ignore_maintenance')) {
+            header('Location: ' . WWW . '/maintenance');
+            exit;
+        }
     }
 }
 

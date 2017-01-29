@@ -27,38 +27,34 @@ class I18n
 
     public static function setGroup($group = 'global')
     {
-        self::$group = $group;
+        self::$group = (string)$group;
     }
 
     /**
-     * @param $key
+     * @param       $key
+     * @param array $replace
+     * @param null  $group
      *
-     * @return int|mixed|string
+     * @return string
      */
-    public static function get($key)
+    public static function get($key, $replace = array(), $group = null)
     {
-        if (isset(self::$translation[self::$group][$key])) {
-            $text = self::$translation[self::$group][$key];
-        } else {
-            return $key;
+        if (is_null($group)) {
+            $group = self::$group;
         }
 
-        $argsCount = func_num_args();
+        if (isset(self::$translation[$group][$key])) {
+            $text = self::$translation[$group][$key];
+        } else {
+            return (string)$key;
+        }
 
-        if ($argsCount > 1) {
-            $firstArg = func_get_arg(1);
-            if (is_array($firstArg)) {
-                foreach ($firstArg as $key => $value) {
-                    $text = str_replace('{' . $key . '}', $value, $text);
-                }
-            } else {
-                for ($i = 1; $i < $argsCount; $i++) {
-                    $givenParam = func_get_arg($i);
-                    $text = str_replace('{' . ($i - 1) . '}', $givenParam, $text);
-                }
+        if (is_array($replace) && count($replace) > 0) {
+            foreach ($replace as $key => $value) {
+                $text = str_replace('{' . $key . '}', $value, $text);
             }
         }
 
-        return $text;
+        return (string)$text;
     }
 }

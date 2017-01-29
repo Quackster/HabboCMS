@@ -5,13 +5,13 @@ return array(
     'Site' => array(
         'www'         => 'http://localhost',
         'hash_secret' => 'wl4bhR1oyT3zP30FXvJtRN6nlLlasMAgR1GF6X5P',
-        'language'    => 'en',
+        'language'    => 'de',
     ),
 
     'MySQL' => array(
         'hostname' => 'localhost',
         'username' => 'root',
-        'password' => '',
+        'password' => 'LOLmich1',
         'database' => 'habbo',
     ),
 
